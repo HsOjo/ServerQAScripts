@@ -1,10 +1,26 @@
 #!/usr/bin/env python3
+import json
 import os
 import subprocess
 import sys
 import time
 
+DATA_FILE = '/tmp/scrvctl.dat'
+
 DEBUG = False
+
+
+def load_data():
+    data = {}
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'r') as io:
+            data = json.load(io)  # type: dict
+    return data
+
+
+def dump_data(data: dict):
+    with open(DATA_FILE, 'w') as io:
+        json.dump(data, io)
 
 
 def sp_run(*args, v_exit=False, v_out=False):
@@ -29,7 +45,17 @@ class Service:
     def screen(self):
         return ['screen', '-S', 'scrv_%s' % self.name]
 
-    def execute(self, cmd):
+    @property
+    def cmd(self):
+        if isinstance(self.args, str):
+            cmd = self.args
+        else:
+            cmd = ' '.join(self.args)
+
+        return cmd
+
+    @staticmethod
+    def execute(cmd):
         return ['-X', 'stuff', cmd + r'\n']
 
     def start(self):
@@ -39,12 +65,7 @@ class Service:
             print('[OK]')
             return True
 
-        if isinstance(self.args, str):
-            cmd = self.args
-        else:
-            cmd = ' '.join(self.args)
-
-        r = sp_run(*self.screen, '-dm', v_exit=False) and sp_run(*self.screen, *self.execute(cmd))
+        r = sp_run(*self.screen, '-dm', v_exit=False) and sp_run(*self.screen, *self.execute(self.cmd))
 
         print('[%s]' % 'OK' if r else 'Failed')
 
@@ -86,11 +107,17 @@ try:
         DEBUG = True
         sys.argv.remove('--debug')
 
-    cmd = sys.argv[1]
+    data = load_data()
+    
+    command = sys.argv[1]
     name = sys.argv[2]
-    args = sys.argv[3:] or os.getenv('SCRV_ARGS')
+    args = sys.argv[3:] or os.getenv('SCRV_ARGS') or data.get(name)
 
-    getattr(Service(name, args), cmd)()
+    getattr(Service(name, args), command)()
+
+    if command == 'start':
+        data[name] = args
+        dump_data(data)
 except IndexError as e:
     print('''%a
     Usage:
