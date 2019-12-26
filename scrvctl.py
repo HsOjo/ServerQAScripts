@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import os
 import subprocess
 import sys
@@ -23,6 +23,7 @@ class Service:
     def __init__(self, name, args):
         self.name = name
         self.args = args
+        sp_run('screen', '-wipe')
 
     @property
     def screen(self):
