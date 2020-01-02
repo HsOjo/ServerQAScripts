@@ -27,7 +27,7 @@ def hogs_connections(count=2):
 
 
 def ban_ip(ip: str):
-    [out, err] = common.sub_exec('ufw deny from %s to any' % ip)
+    [out, err] = common.sub_exec('ufw insert 1 deny from %s to any' % ip)
     return 'added' in out
 
 
