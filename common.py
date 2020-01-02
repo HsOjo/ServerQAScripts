@@ -7,6 +7,6 @@ def str_compare_head_tail(text, head, tail=None):
     return text[:len(head)] == head and text[-len(tail):] == tail
 
 
-def sub_exec(args, input=None, timeout=None):
-    proc = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+def sub_exec(args, input=None, timeout=None, **kwargs):
+    proc = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, **kwargs)
     return proc.communicate(input, timeout)
