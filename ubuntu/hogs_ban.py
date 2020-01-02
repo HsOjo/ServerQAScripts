@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-import os
 import re
 from typing import List, Dict
 
 from geoip import geolite2, IPInfo
+
+import common
 
 
 def parse_connections(content: str):
@@ -21,13 +22,13 @@ def parse_connections(content: str):
 
 
 def hogs_connections(count=2):
-    proc = os.popen('nethogs -t -c %d' % count)
-    result = proc.read()  # type: str
-    return parse_connections(result)
+    [out, err] = common.sub_exec('nethogs -t -c %d' % count)
+    return parse_connections(out)
 
 
 def ban_ip(ip: str):
-    os.system('ufw deny from %s to any' % ip)
+    [out, err] = common.sub_exec('ufw deny from %s to any' % ip)
+    return 'added' in out
 
 
 count = 2
@@ -38,9 +39,10 @@ while True:
         ip = geolite2.lookup(src_host)  # type: IPInfo
         if ip is not None:
             if ip.country != 'CN':
-                ban_ip(src_host)
+                if ban_ip(src_host):
+                    print('Ban IP: [%s] %s' % (ip.country, src_host))
         else:
-            print(src_host)
+            print('Unknown IP: %s' % src_host)
 
     if len(conns) <= 0:
         count += 1
