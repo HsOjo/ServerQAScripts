@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import re
+import time
 from typing import List, Dict
 
 from geoip import geolite2, IPInfo
@@ -37,12 +38,14 @@ while True:
     for conn in conns:
         src_host = conn['src_host']
         ip = geolite2.lookup(src_host)  # type: IPInfo
+
+        country = None
         if ip is not None:
-            if ip.country != 'CN':
-                if ban_ip(src_host):
-                    print('Ban IP: [%s] %s' % (ip.country, src_host))
-        else:
-            print('Unknown IP: %s' % src_host)
+            country = ip.country
+
+        if country != 'CN':
+            if ban_ip(src_host):
+                print('%s Ban IP: [%s] %s' % (time.ctime(), country, src_host))
 
     if len(conns) <= 0:
         count += 1
