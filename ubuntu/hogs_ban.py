@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import re
 import time
-from typing import List, Dict
+from typing import List, Dict, Any
 
 from geoip import geolite2, IPInfo
 
@@ -10,7 +10,7 @@ import common
 
 def parse_connections(content: str):
     items = re.findall('(\d+\.\d+\.\d+\.\d+):(\d+)-(\d+\.\d+\.\d+\.\d+):(\d+)', content)
-    connections = []  # type: List[Dict[str, str]]
+    connections = []  # type: List[Dict[str, Any]]
     for dest_host, dest_port, src_host, src_port in items:
         connections.append(dict(
             dest_host=dest_host,
@@ -44,8 +44,9 @@ while True:
             country = ip.country
 
         if country != 'CN':
-            if ban_ip(src_host):
-                print('%s Ban IP: [%s] %s' % (time.ctime(), country, src_host))
+            if conn['src_port'] > 1024:
+                if ban_ip(src_host):
+                    print('%s Ban IP: [%s] %s' % (time.ctime(), country, src_host))
 
     if len(conns) <= 0:
         count += 1
