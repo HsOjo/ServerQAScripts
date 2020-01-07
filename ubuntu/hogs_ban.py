@@ -43,7 +43,7 @@ while True:
         if ip is not None:
             country = ip.country
 
-        if conn['src_port'] > 1024:
+        if conn['src_port'] > 1024 and conn['dest_port'] not in [80, 443]:
             if ban_ip(src_ip):
                 print('%s Ban IP: [%s] %s' % (time.ctime(), country, src_ip))
 
