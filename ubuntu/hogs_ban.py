@@ -11,11 +11,11 @@ import common
 def parse_connections(content: str):
     items = re.findall('(\d+\.\d+\.\d+\.\d+):(\d+)-(\d+\.\d+\.\d+\.\d+):(\d+)', content)
     connections = []  # type: List[Dict[str, Any]]
-    for dest_host, dest_port, src_host, src_port in items:
+    for dest_ip, dest_port, src_ip, src_port in items:
         connections.append(dict(
-            dest_host=dest_host,
+            dest_ip=dest_ip,
             dest_port=int(dest_port),
-            src_host=src_host,
+            src_ip=src_ip,
             src_port=int(src_port),
         ))
 
@@ -36,16 +36,16 @@ count = 2
 while True:
     conns = hogs_connections(count)
     for conn in conns:
-        src_host = conn['src_host']
-        ip = geolite2.lookup(src_host)  # type: IPInfo
+        src_ip = conn['src_ip']
+        ip = geolite2.lookup(src_ip)  # type: IPInfo
 
         country = None
         if ip is not None:
             country = ip.country
 
         if conn['src_port'] > 1024:
-            if ban_ip(src_host):
-                print('%s Ban IP: [%s] %s' % (time.ctime(), country, src_host))
+            if ban_ip(src_ip):
+                print('%s Ban IP: [%s] %s' % (time.ctime(), country, src_ip))
 
     if len(conns) <= 0:
         count += 1
