@@ -43,10 +43,9 @@ while True:
         if ip is not None:
             country = ip.country
 
-        if country != 'CN':
-            if conn['src_port'] > 1024:
-                if ban_ip(src_host):
-                    print('%s Ban IP: [%s] %s' % (time.ctime(), country, src_host))
+        if conn['src_port'] > 1024:
+            if ban_ip(src_host):
+                print('%s Ban IP: [%s] %s' % (time.ctime(), country, src_host))
 
     if len(conns) <= 0:
         count += 1
